@@ -3,18 +3,11 @@ pipeline {
   environment {
     IMAGE_NAME = "my-web-app:latest"
     CONTAINER_NAME = "my-web-app-container"
+    HOST_PORT = "8081"
   }
   stages {
-    stage('Checkout') {
-      steps {
-        checkout scm
-      }
-    }
-    stage('Build Docker image') {
-      steps {
-        sh 'docker build -t $IMAGE_NAME .'
-      }
-    }
+    stage('Checkout') { steps { checkout scm } }
+    stage('Build Docker image') { steps { sh 'docker build -t $IMAGE_NAME .' } }
     stage('Stop old container') {
       steps {
         sh '''
@@ -30,12 +23,12 @@ pipeline {
     }
     stage('Run container') {
       steps {
-        sh 'docker run -d --name $CONTAINER_NAME -p 8080:80 $IMAGE_NAME'
+        sh 'docker run -d --name $CONTAINER_NAME -p ${HOST_PORT}:80 $IMAGE_NAME'
       }
     }
   }
   post {
-    success { echo "Deployment success. Visit port 8080." }
+    success { echo "Deployment success. Visit: http://<server-ip>:${HOST_PORT}" }
     failure { echo "Pipeline failed." }
   }
 }
